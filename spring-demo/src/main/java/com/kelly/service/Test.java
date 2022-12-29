@@ -15,6 +15,7 @@ public class Test {
 
         // 3. 测试模拟动态代理AOP
         AOPServiceI aopService = (AOPServiceI)applicationContext.getBean("AOPService");
+        aopService.testAOP();
 
 //        System.out.println(applicationContext.getBean("userService"));
 //        System.out.println(applicationContext.getBean("userService"));
