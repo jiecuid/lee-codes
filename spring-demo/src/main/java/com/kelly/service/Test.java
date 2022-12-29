@@ -9,10 +9,12 @@ public class Test {
         // 1.创建一个 Spring 容器
         KellyApplicationContext applicationContext = new KellyApplicationContext(AppConfig.class);
 
-        // 2. 通过 applicationContext 获取 Bean
-        UserService userService = (UserService)applicationContext.getBean("userService");
+//        // 2. 通过 applicationContext 获取 Bean
+//        UserService userService = (UserService)applicationContext.getBean("userService");
+//        userService.test();
 
-        userService.test();
+        // 3. 测试模拟动态代理AOP
+        AOPServiceI aopService = (AOPServiceI)applicationContext.getBean("AOPService");
 
 //        System.out.println(applicationContext.getBean("userService"));
 //        System.out.println(applicationContext.getBean("userService"));

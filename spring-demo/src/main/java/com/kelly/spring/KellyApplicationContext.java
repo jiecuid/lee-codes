@@ -160,7 +160,7 @@ public class KellyApplicationContext {
 
             // 4.beanPostProcessor (bean的后置处理器): postProcessBeforeInitialization
             for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
-                beanPostProcessor.postProcessBeforeInitialization(instance, beanName);
+                instance = beanPostProcessor.postProcessBeforeInitialization(instance, beanName);
             }
 
             // 5.InitializingBean 初始化
@@ -170,7 +170,7 @@ public class KellyApplicationContext {
 
             // 6.beanPostProcessor (bean的后置处理器): postProcessAfterInitialization
             for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
-                beanPostProcessor.postProcessAfterInitialization(instance, beanName);
+                instance = beanPostProcessor.postProcessAfterInitialization(instance, beanName);
             }
 
             //  初始化后AOP

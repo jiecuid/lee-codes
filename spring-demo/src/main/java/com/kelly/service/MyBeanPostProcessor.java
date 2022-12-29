@@ -4,6 +4,10 @@ import com.kelly.spring.BeanPostProcessor;
 import com.kelly.spring.Component;
 import org.springframework.beans.BeansException;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 /**
  * BeanPostProcessor 可以让我们更容器的干涉Bean 的初始化过程
  */
@@ -25,6 +29,18 @@ public class MyBeanPostProcessor implements BeanPostProcessor {
             System.out.println("我是userService初始化后执行的方法。。。");
         }
 
-        return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+        if (beanName.equals("AOPService")) {
+            Object proxyInstance = Proxy.newProxyInstance(MyBeanPostProcessor.class.getClassLoader(),
+                    bean.getClass().getInterfaces(),
+                    new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            System.out.println("JDK动态代理切面逻辑...");
+                            return method.invoke(bean, args);
+                        }
+                    });
+            return proxyInstance;
+        }
+        return bean;
     }
 }
