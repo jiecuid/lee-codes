@@ -1,6 +1,6 @@
 Bean的创建的生命周期
 
-AService.class--->推断构造方法-->反射得到实例化对象-->依赖注入-->初始化前-->初始化-->初始化后（AOP）-->代理对象-->放入Map<beanName,beanDefinition>(单例池)-->Bean对象
+AService.class--->实例化（推断构造方法-->反射得到实例化对象）-->依赖注入-->初始化前-->初始化-->初始化后（AOP）-->代理对象-->放入Map<beanName,beanDefinition>(单例池)-->Bean对象
 
 
 1.推断构造方法(先 byType ,然后 byName)
@@ -20,6 +20,8 @@ AService.class--->推断构造方法-->反射得到实例化对象-->依赖注�
 
     这里就会有一种出现循环依赖的情况，比如 AService 的属性是 BService， BService 的属性是 AService；那么Spring 是如何解决循环依赖的呢？
 
+
+
     这里还有一种情况，在单例池 Map<beanName,beanDefinition>里，可能会有多个 BService 类型的对象，他们的名字（BeanName）不同，但是类型相同，
 那么 Spring 是是怎么确定 我当前 AService 的构造方法需要的入参数 BService 是那一个 BService的Bean对象呢？
 
@@ -32,3 +34,11 @@ AService.class--->推断构造方法-->反射得到实例化对象-->依赖注�
 
 3.初始化前
     Spring 容器在启动的时候会去找那些加了 @PostConstruct 注解的方法，去执行这些方法。@PostConstruct 注解必须加在非静态无返回值的方法上。
+
+
+  在Spring中没有加 @Autowired 注解的属性怎么填充？
+
+   1.通过@PostConstruct 注解的方法去为这些属性赋值，
+   2.实现了InitializingBean接口,通过重写 afterPropertiesSet()方法进行赋值
+   3.通过 Aware接口回调进行赋值
+   4.通过实现beanPostProcessor (bean的后置处理器) 进行赋值

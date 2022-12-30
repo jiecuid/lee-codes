@@ -1,0 +1,59 @@
+
+Spring 是如何解决循环依赖的 ？
+
+ 三级缓存：
+    第一级缓存 ： Map<String, Object> singletonObject: 保存的是经过完整的 Bean 的生命周期之后的一个 Bean 对象；
+    第二级缓存 ： Map<String, Object> earlySingletonObject:保存的是早期 Bean 普通对象 或者 正在实例化的Bean 提前 AOP 的代理对象，保证早期Bean对象永远是单例，这些代理对象对应的Bean还没有经过完整的Bean的生命周期，是不完整的。
+    第三级缓存 ： Map<String, ObjectFactory> singletonFactories: 支持循环依赖，打破循环依赖
+
+    我们先来看一下 AService 的 Bean 的没有AOP时的生命周期
+    1. 实例化--> 得到AService 的普通对象 --> 存入第三级缓存singletonFactories.put("AService", ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象))
+    2.填充 AService 的属性： BService --> 去单单例池里找BService--> 没找到就会创建 BService 的普通对象
+        BService 的 Bean 的生命周期:
+            2.1. 实例化--> 普通对象
+            2.2.填充 AService --> 去单单例池里找 AService 没找到-->在creatingSet发现AService正在被实例化 -->说明AService出现了循环依赖
+            -->去第二级缓存 earlySingletonObject 里找 AService --> 找到了就会直接拿来用
+            -->如果没找到，就去执行三级缓存singletonFactories的 lambda 表达式 ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象)
+            --> 执行 lambda 式，判断AService是否需要 AOP--> 发现不需要 AOP --> 得到AService 的普通对象
+             -->放入 Spring 第二级缓存去earlySingletonObject里 Map<"AService", "AService的的普通对象">
+            2.3.填充其他属性
+            2.4.做一些其他的事情
+            2.5.添加到单例池
+
+    3.填充其他属性
+    4.做一些其他的事情
+    5.添加到单例池
+
+    那么Spring 判断出循环依赖了，AService 的 Bean 的正常生命周期又是怎样的呢？
+
+    ****出现循环依赖如果有AOP -->那么会提前进行 AOP; AService的代理对象.target = AService的普通对象
+    我们先来看一下 AService 出现循环依赖时的 Bean 的生命周期
+        0. 将正在实例化的 Bean 放到一个集合里 creatingBean<"AService">
+        1. 实例化--> AService 的普通对象 --> 存入第三级缓存singletonFactories.put("AService", ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象))
+        2.填充 AService 的属性 BService --> 去单单例池里找BService--> 没找到就会创建 BService 的普通对象
+            BService 的 Bean 的生命周期:
+                2.1. 实例化--> 普通对象
+                2.2.填充 AService --> 去单单例池里找 AService 没找到-->在creatingSet发现AService正在被实例化 -->说明AService出现了循环依赖
+                -->去第二级缓存 earlySingletonObject里找AService --> 找到了就会直接拿来用
+                -->如果没找到，就去执行三级缓存singletonFactories的 lambda 表达式 ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象)
+                --> 执行 lambda 式，判断AService是否需要 AOP --> 需要的话，执行lambda 表达式里的对 AService 提前进行AOP --> · 得到 AService 的代理对象
+                -->放入 Spring 第二级缓存去earlySingletonObject里 Map<"AService", "AService的代理对象">
+                2.3.填充其他属性
+                2.4.做一些其他的事情（比如 AOP）--> BService 的代理对象
+                2.5.添加到单例池
+
+        3.填充 AService 的属性 CService --> 去单单例池里找CService--> 没找到就会创建 CService 的普通对象
+              CService 的 Bean 的生命周期:
+                  3.1. 实例化--> 普通对象
+                  3.2.填充 AService --> 去单单例池里找 AService 没找到-->creatingSet里找到了AService -->说明AService出现了循环依赖
+                      -->第二级缓存去earlySingletonObject里找AService代理对象 -->找到了AService的代理对象就会直接拿来用
+                  3.3.填充其他属性
+                  3.4.做一些其他的事情（比如 AOP）--> BService 的代理对象
+                  3.5.添加到单例池
+
+        3.填充其他属性
+        4.做一些其他的事情（比如 AOP--> AService 的代理对象，这一步被提前了）
+        5.此时就可以从二级缓存里去拿代理对象添加到单例池
+        6. creatingBean.remove<"AService">
+
+
