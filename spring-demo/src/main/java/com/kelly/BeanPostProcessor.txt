@@ -1,0 +1,19 @@
+
+PostProcessor 增强器，有些人也叫做 后置处理器
+
+1.BeanFactoryPostProcessor: BeanFactory 的增强器，是Spring 提供的一个接口
+
+方法 ： postProcessBeanFactory
+
+执行时机：Spring 生成 BeanDefinition 之后，实例化之前执行的
+
+作用：对 Spring 扫描解析到的 BeanDefinition 进行增强
+
+
+2.BeanPostProcessor
+
+方法 ： postProcessBeforeInitialization , postProcessAfterInitialization
+
+执行时机：bean 对象 执行初始化方法前，后执行
+
+作用：对Bean 对象进行增强。一般在 After 方法里如果需要AOP, 会执行 AOP操作
