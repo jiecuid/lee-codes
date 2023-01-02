@@ -8,7 +8,9 @@ Spring 是如何解决循环依赖的 ？
 
     我们先来看一下 AService 的 Bean 的没有AOP时的生命周期
     1. 实例化--> 得到AService 的普通对象 --> 存入第三级缓存singletonFactories.put("AService", ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象))
-    2.填充 AService 的属性： BService --> 去单单例池里找BService--> 没找到就会创建 BService 的普通对象
+    2.填充 AService 的属性： BService --> 去单单例池（也就是一级缓存 singletonObjec t）里找 BService --> 如果没找到 BService ，
+    并且BService不是正在创建的Bean（IsSingletonCurrentlyInCreatinon(beanName)）-->就会去二缓存 earlySingletonObject 里找
+     -->如果二级缓存里也没找到，就去三级缓存 singletonFactories 里找--> 如果三级缓存里也没找到，就会创建 BService 的普通对象
         BService 的 Bean 的生命周期:
             2.1. 实例化--> 普通对象
             2.2.填充 AService --> 去单单例池里找 AService 没找到-->在creatingSet发现AService正在被实例化 -->说明AService出现了循环依赖
@@ -30,7 +32,9 @@ Spring 是如何解决循环依赖的 ？
     我们先来看一下 AService 出现循环依赖时的 Bean 的生命周期
         0. 将正在实例化的 Bean 放到一个集合里 creatingBean<"AService">
         1. 实例化--> AService 的普通对象 --> 存入第三级缓存singletonFactories.put("AService", ()->getEarlyBeanReference(beanName, mbd，AService 的普通对象))
-        2.填充 AService 的属性 BService --> 去单单例池里找BService--> 没找到就会创建 BService 的普通对象
+        2.填充 AService 的属性 BService --> --> 去单单例池（也就是一级缓存 singletonObjec t）里找 BService --> 如果没找到 BService ，
+          并且BService不是正在创建的Bean（IsSingletonCurrentlyInCreatinon(beanName)）-->就会去二缓存 earlySingletonObject 里找
+          -->如果二级缓存里也没找到，就去三级缓存 singletonFactories 里找--> 如果三级缓存里也没找到，就会创建 BService 的普通对象
             BService 的 Bean 的生命周期:
                 2.1. 实例化--> 普通对象
                 2.2.填充 AService --> 去单单例池里找 AService 没找到-->在creatingSet发现AService正在被实例化 -->说明AService出现了循环依赖
