@@ -1,7 +1,5 @@
 BeanFactory 和 FactoryBean , ApplicationContext
 
-
-
 1.BeanFactory Spring 提供的一个容器顶级接口，Spring 中很多容器都是继承了 BeanFactory，比如 ApplicationContext（提供了一系列更加完善的一些方法），
 DefaultListableBeanFactory (我们创建的所有对象其实都是放在它里面)
 
