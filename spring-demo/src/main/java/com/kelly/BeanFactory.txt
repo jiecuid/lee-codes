@@ -1,0 +1,36 @@
+BeanFactory 和 FactoryBean , ApplicationContext
+
+
+
+1.BeanFactory Spring 提供的一个容器顶级接口，Spring 中很多容器都是继承了 BeanFactory，比如 ApplicationContext（提供了一系列更加完善的一些方法），
+DefaultListableBeanFactory (我们创建的所有对象其实都是放在它里面)
+
+提供了创建Bean 的方法： Object getBean(String name)
+
+<T> T getBean(String name, Class<T> requiredType) / Object getBean(String name, Object... args)  等
+
+在 Spring 的 BeanFactory 源码的注释上可以看到这样一段话 ： Bean factory implementations should support the standard bean lifecycle interfaces as far as possible.
+
+也就是说 BeanFactory 的实现应尽可能的支持标准的 Bean 的生命周期接口，所以由 BeanFactory 创建出来的 Bean 都是经历过了完整的 Bean 的生命周期
+
+
+2. FactoryBean
+
+    Spring 通过 BeanFactory 创建的对象，必须走完 完整的 Bean 的生命周期，需要经过一系列繁琐的操作，所以 Spring 提供了一种简单的创建 Bean 的接口 FactoryBean，
+用户可以根据自己的业务需要去创建对象，FactoryBean 这个接口提供了3个方法：
+
+// 是否是单例
+default boolean isSingleton() {
+        return true;
+    }
+
+    T getObject() : 用户可以根据自己的业务需要去创建对象，比如 new一个对象，或者通过代理创建一个代理对象，
+                    Spring 中 有很多实现了BeanFactory接口去创建对象的例子，最常见的就是 AOP 的代理对象的实现（ProxyBeanFactory implements BeanFactory）
+
+    Class<?> getObjectType()：获取对象的类型
+
+3.ApplicationContext 和 BeanFactory 有什么关系 ？
+
+ApplicationContext 继承了 BeanFactory，提供了一系列更加完善的功能。看 Spring 源码可以看到 BeanFactory 提供的都是getBean的方法，不够用啊，
+
+所以 ApplicationContext 基于 BeanFactory 提供了一系列更加完善的一些方法。

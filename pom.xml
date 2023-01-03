@@ -13,6 +13,7 @@
 	<modules>
 		<module>spring-demo</module>
 		<module>lee-code</module>
+		<module>spring-zcl-demo</module>
 	</modules>
 
 	<parent>
