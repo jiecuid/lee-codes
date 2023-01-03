@@ -9,6 +9,13 @@ PostProcessor 增强器，有些人也叫做 后置处理器
 
 作用：对 Spring 扫描解析到的 BeanDefinition 进行增强
 
+应用场景：将Spring 内置的Bean AService（来自二方包或者三方包的Bean）修改成我们自己的Bean BService
+
+假如AService 里有一个 test方法，这个test方法不能满足我们自己的需求，所以我定义了一个 BService 去继承 AService，然后重写AService 的 test方法， 那么怎样才能让Spring容器启动的时候加载AService的时候，将其偷梁换柱，换成我的我的BService，可以让我的test 方法生效呢？
+
+	postProcessBeanFactory就可以为我们解决这个问题，我们可以从 ConfigurableListableBeanFactory 里拿到 所有的 AService 的 BeanDefinition
+，对BeanDefinition进行修改，使其指向 BService
+
 
 2.BeanPostProcessor
 
